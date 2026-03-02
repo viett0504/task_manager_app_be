@@ -79,20 +79,29 @@ router.post('/reset-database', async (req: Request, res: Response) => {
   try {
     console.log('Resetting database...');
     
-    // Clear all data using clear() instead of delete({})
-    const taskRepo = AppDataSource.getRepository('Task');
-    const milestoneRepo = AppDataSource.getRepository('Milestone');
-    const sprintRepo = AppDataSource.getRepository('Sprint');
-    const teamMemberRepo = AppDataSource.getRepository('TeamMember');
-    const teamRepo = AppDataSource.getRepository('Team');
-    const userRepo = AppDataSource.getRepository('User');
+    // Import models
+    const { Task } = await import('../models/Task');
+    const { Milestone } = await import('../models/Milestone');
+    const { Sprint } = await import('../models/Sprint');
+    const { TeamMember } = await import('../models/TeamMember');
+    const { Team } = await import('../models/Team');
+    const { User } = await import('../models/User');
     
-    await taskRepo.clear();
-    await milestoneRepo.clear();
-    await sprintRepo.clear();
-    await teamMemberRepo.clear();
-    await teamRepo.clear();
-    await userRepo.clear();
+    // Delete in correct order (child tables first)
+    const taskRepo = AppDataSource.getRepository(Task);
+    const milestoneRepo = AppDataSource.getRepository(Milestone);
+    const sprintRepo = AppDataSource.getRepository(Sprint);
+    const teamMemberRepo = AppDataSource.getRepository(TeamMember);
+    const teamRepo = AppDataSource.getRepository(Team);
+    const userRepo = AppDataSource.getRepository(User);
+    
+    // Delete all records (order matters due to foreign keys)
+    await taskRepo.createQueryBuilder().delete().execute();
+    await milestoneRepo.createQueryBuilder().delete().execute();
+    await sprintRepo.createQueryBuilder().delete().execute();
+    await teamMemberRepo.createQueryBuilder().delete().execute();
+    await teamRepo.createQueryBuilder().delete().execute();
+    await userRepo.createQueryBuilder().delete().execute();
     
     console.log('All data deleted');
     
