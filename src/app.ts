@@ -29,7 +29,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     database: AppDataSource.isInitialized ? 'connected' : 'disconnected',
-    redis: redisClient.isOpen ? 'connected' : 'disconnected'
+    redis: redisClient && redisClient.isOpen ? 'connected' : 'not configured'
   });
 });
 
@@ -46,9 +46,15 @@ const startServer = async () => {
     await AppDataSource.initialize();
     console.log('✅ Database connected');
 
-    // Initialize Redis
-    await redisClient.connect();
-    console.log('✅ Redis connected');
+    // Initialize Redis (optional)
+    if (redisClient) {
+      try {
+        await redisClient.connect();
+        console.log('✅ Redis connected');
+      } catch (error) {
+        console.warn('⚠️  Redis connection failed, continuing without cache:', error);
+      }
+    }
 
     // Start server
     const portNumber = typeof PORT === 'string' ? parseInt(PORT) : PORT;

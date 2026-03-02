@@ -12,24 +12,37 @@ const getRedisConfig = () => {
     return { url: redisUrl };
   }
   
+  // Check if Redis is configured
+  const redisHost = process.env.REDIS_HOST;
+  if (!redisHost || redisHost === '') {
+    return null; // No Redis configured
+  }
+  
   // Fallback to individual env vars for local development
   return {
     socket: {
-      host: process.env.REDIS_HOST || 'localhost',
+      host: redisHost,
       port: parseInt(process.env.REDIS_PORT || '6379'),
     },
     password: process.env.REDIS_PASSWORD || undefined,
   };
 };
 
-export const redisClient = createClient(getRedisConfig());
+const config = getRedisConfig();
 
-redisClient.on('error', (err) => {
-  console.error('Redis Client Error:', err);
-});
+// Create Redis client only if configured
+export const redisClient = config ? createClient(config) : null;
 
-redisClient.on('connect', () => {
-  console.log('Redis Client Connected');
-});
+if (redisClient) {
+  redisClient.on('error', (err) => {
+    console.error('Redis Client Error:', err);
+  });
+
+  redisClient.on('connect', () => {
+    console.log('✅ Redis Client Connected');
+  });
+} else {
+  console.log('⚠️  Redis not configured - running without cache');
+}
 
 export default redisClient;
