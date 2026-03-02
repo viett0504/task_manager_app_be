@@ -88,10 +88,10 @@ export async function seedAll() {
 
   // 5. Create milestones
   const milestones = [
-    { name: 'MVP Release', date: new Date('2026-03-07'), status: 'completed' },
-    { name: 'Beta Testing', date: new Date('2026-03-10'), status: 'in_progress' },
-    { name: 'Production Deploy', date: new Date('2026-03-14'), status: 'pending' },
-    { name: 'Post-Launch Review', date: new Date('2026-03-17'), status: 'pending' },
+    { title: 'MVP Release', name: 'MVP Release', date: new Date('2026-03-07'), status: 'completed' },
+    { title: 'Beta Testing', name: 'Beta Testing', date: new Date('2026-03-10'), status: 'in_progress' },
+    { title: 'Production Deploy', name: 'Production Deploy', date: new Date('2026-03-14'), status: 'pending' },
+    { title: 'Post-Launch Review', name: 'Post-Launch Review', date: new Date('2026-03-17'), status: 'pending' },
   ];
 
   for (const m of milestones) {
