@@ -19,9 +19,11 @@ export async function seedAll() {
   // Check if data already exists
   const existingUsers = await userRepo.count();
   if (existingUsers > 0) {
-    console.log('⚠️  Data already exists');
+    console.log('⚠️  Data already exists, skipping...');
     return;
   }
+
+  console.log('Creating users...');
 
   // 1. Create users
   const password = await bcrypt.hash('1', 12);

@@ -75,4 +75,35 @@ router.post('/seed-all', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/reset-database', async (req: Request, res: Response) => {
+  try {
+    console.log('Resetting database...');
+    
+    // Drop all tables and recreate
+    await AppDataSource.dropDatabase();
+    await AppDataSource.synchronize();
+    
+    // Run migrations
+    await AppDataSource.runMigrations();
+    
+    // Seed data
+    const { seedAll } = await import('../scripts/seed-all');
+    await seedAll();
+    
+    res.json({
+      success: true,
+      message: 'Database reset and seeded successfully!',
+    });
+  } catch (error: any) {
+    console.error('Reset database error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        code: 'RESET_ERROR',
+      },
+    });
+  }
+});
+
 export default router;
