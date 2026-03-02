@@ -156,10 +156,11 @@ export class TeamController {
     try {
       const { id } = req.params;
       const userId = req.user!.id;
-      const { user_id, role = 'member', allocation_percentage = 100 } = req.body;
+      const { email, user_id, role = 'member', allocation_percentage = 100 } = req.body;
 
-      if (!user_id) {
-        throw new AppError('User ID is required', 400, 'VALIDATION_ERROR');
+      // Must provide either email or user_id
+      if (!email && !user_id) {
+        throw new AppError('Email or User ID is required', 400, 'VALIDATION_ERROR');
       }
 
       const teamMemberRepository = AppDataSource.getRepository(TeamMember);
@@ -174,15 +175,23 @@ export class TeamController {
         throw new AppError('You do not have permission to add members', 403, 'FORBIDDEN');
       }
 
-      // Check if user exists
-      const user = await userRepository.findOne({ where: { id: user_id } });
-      if (!user) {
-        throw new AppError('User not found', 404, 'NOT_FOUND');
+      // Find user by email or user_id
+      let user;
+      if (email) {
+        user = await userRepository.findOne({ where: { email } });
+        if (!user) {
+          throw new AppError('User with this email not found', 404, 'NOT_FOUND');
+        }
+      } else {
+        user = await userRepository.findOne({ where: { id: user_id } });
+        if (!user) {
+          throw new AppError('User not found', 404, 'NOT_FOUND');
+        }
       }
 
       // Check if already a member
       const existingMember = await teamMemberRepository.findOne({
-        where: { user_id, team_id: id },
+        where: { user_id: user.id, team_id: id },
       });
 
       if (existingMember) {
@@ -192,16 +201,36 @@ export class TeamController {
       // Add member
       const member = teamMemberRepository.create({
         team_id: id,
-        user_id,
+        user_id: user.id,
         role,
         allocation_percentage,
       });
 
       await teamMemberRepository.save(member);
 
+      // Load member with user info
+      const savedMember = await teamMemberRepository.findOne({
+        where: { id: member.id },
+        relations: ['user'],
+      });
+
       res.status(201).json({
         success: true,
-        data: { member },
+        data: { 
+          member: {
+            id: savedMember!.id,
+            role: savedMember!.role,
+            allocation_percentage: savedMember!.allocation_percentage,
+            ai_score: savedMember!.user.ai_score,
+            is_online: savedMember!.user.is_active,
+            user: {
+              id: savedMember!.user.id,
+              full_name: savedMember!.user.full_name,
+              email: savedMember!.user.email,
+              avatar_url: savedMember!.user.avatar_url,
+            },
+          }
+        },
       });
     } catch (error) {
       next(error);
