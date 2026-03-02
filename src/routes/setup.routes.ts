@@ -79,7 +79,7 @@ router.post('/reset-database', async (req: Request, res: Response) => {
   try {
     console.log('Resetting database...');
     
-    // Delete all data instead of dropping tables
+    // Clear all data using clear() instead of delete({})
     const taskRepo = AppDataSource.getRepository('Task');
     const milestoneRepo = AppDataSource.getRepository('Milestone');
     const sprintRepo = AppDataSource.getRepository('Sprint');
@@ -87,12 +87,12 @@ router.post('/reset-database', async (req: Request, res: Response) => {
     const teamRepo = AppDataSource.getRepository('Team');
     const userRepo = AppDataSource.getRepository('User');
     
-    await taskRepo.delete({});
-    await milestoneRepo.delete({});
-    await sprintRepo.delete({});
-    await teamMemberRepo.delete({});
-    await teamRepo.delete({});
-    await userRepo.delete({});
+    await taskRepo.clear();
+    await milestoneRepo.clear();
+    await sprintRepo.clear();
+    await teamMemberRepo.clear();
+    await teamRepo.clear();
+    await userRepo.clear();
     
     console.log('All data deleted');
     
