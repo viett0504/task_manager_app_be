@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
-import { execSync } from 'child_process';
 
 const router = Router();
 
@@ -48,6 +47,121 @@ router.post('/seed-data', async (req: Request, res: Response) => {
       error: {
         message: error.message,
         code: 'SEED_ERROR',
+      },
+    });
+  }
+});
+
+router.post('/seed-tasks', async (req: Request, res: Response) => {
+  try {
+    console.log('Seeding tasks...');
+    
+    const { seedTasks } = await import('../scripts/seed-tasks');
+    await seedTasks();
+    
+    res.json({
+      success: true,
+      message: 'Tasks seeded successfully',
+    });
+  } catch (error: any) {
+    console.error('Seed tasks error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        code: 'SEED_TASKS_ERROR',
+      },
+    });
+  }
+});
+
+router.post('/seed-more-tasks', async (req: Request, res: Response) => {
+  try {
+    console.log('Seeding more tasks...');
+    
+    const { seedMoreTasks } = await import('../scripts/seed-more-tasks');
+    await seedMoreTasks();
+    
+    res.json({
+      success: true,
+      message: 'More tasks seeded successfully',
+    });
+  } catch (error: any) {
+    console.error('Seed more tasks error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        code: 'SEED_MORE_TASKS_ERROR',
+      },
+    });
+  }
+});
+
+router.post('/seed-team-members', async (req: Request, res: Response) => {
+  try {
+    console.log('Seeding team members...');
+    
+    const { seedTeamMembers } = await import('../scripts/seed-team-members');
+    await seedTeamMembers();
+    
+    res.json({
+      success: true,
+      message: 'Team members seeded successfully',
+    });
+  } catch (error: any) {
+    console.error('Seed team members error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        code: 'SEED_TEAM_MEMBERS_ERROR',
+      },
+    });
+  }
+});
+
+router.post('/seed-milestones', async (req: Request, res: Response) => {
+  try {
+    console.log('Seeding milestones...');
+    
+    const { seedMilestones } = await import('../scripts/seed-milestones');
+    await seedMilestones();
+    
+    res.json({
+      success: true,
+      message: 'Milestones seeded successfully',
+    });
+  } catch (error: any) {
+    console.error('Seed milestones error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        code: 'SEED_MILESTONES_ERROR',
+      },
+    });
+  }
+});
+
+router.post('/seed-all', async (req: Request, res: Response) => {
+  try {
+    console.log('Seeding all data...');
+    
+    const { seedAll } = await import('../scripts/seed-all');
+    await seedAll();
+    
+    res.json({
+      success: true,
+      message: 'All data seeded successfully! Login with admin@gmail.com / 1',
+    });
+  } catch (error: any) {
+    console.error('Seed all error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message,
+        code: 'SEED_ALL_ERROR',
       },
     });
   }
