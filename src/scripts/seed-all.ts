@@ -60,8 +60,19 @@ export async function seedAll() {
   await teamRepo.save(team);
   console.log('✅ Team created');
 
-  // 3. Create team members
+  // 3. Create team members (including admin as owner)
   const teamMembers = [];
+  
+  // Add admin as owner
+  const adminMember = teamMemberRepo.create({
+    user_id: admin.id,
+    team_id: team.id,
+    role: 'owner',
+    allocation_percentage: 100,
+  });
+  teamMembers.push(adminMember);
+  
+  // Add other users
   const roles = ['developer', 'designer', 'developer', 'qa', 'developer'];
   for (let i = 0; i < users.length; i++) {
     const member = teamMemberRepo.create({
@@ -73,7 +84,7 @@ export async function seedAll() {
     teamMembers.push(member);
   }
   await teamMemberRepo.save(teamMembers);
-  console.log('✅ Team members created');
+  console.log('✅ Team members created (including admin)');
 
   // 4. Create sprint
   const sprint = sprintRepo.create({
