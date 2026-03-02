@@ -79,12 +79,22 @@ router.post('/reset-database', async (req: Request, res: Response) => {
   try {
     console.log('Resetting database...');
     
-    // Drop all tables and recreate
-    await AppDataSource.dropDatabase();
-    await AppDataSource.synchronize();
+    // Delete all data instead of dropping tables
+    const taskRepo = AppDataSource.getRepository('Task');
+    const milestoneRepo = AppDataSource.getRepository('Milestone');
+    const sprintRepo = AppDataSource.getRepository('Sprint');
+    const teamMemberRepo = AppDataSource.getRepository('TeamMember');
+    const teamRepo = AppDataSource.getRepository('Team');
+    const userRepo = AppDataSource.getRepository('User');
     
-    // Run migrations
-    await AppDataSource.runMigrations();
+    await taskRepo.delete({});
+    await milestoneRepo.delete({});
+    await sprintRepo.delete({});
+    await teamMemberRepo.delete({});
+    await teamRepo.delete({});
+    await userRepo.delete({});
+    
+    console.log('All data deleted');
     
     // Seed data
     const { seedAll } = await import('../scripts/seed-all');
