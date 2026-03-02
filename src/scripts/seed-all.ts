@@ -67,7 +67,6 @@ export async function seedAll() {
       team_id: team.id,
       role: roles[i],
       allocation_percentage: 80 + Math.floor(Math.random() * 20),
-      ai_score: users[i].ai_score,
     });
     teamMembers.push(member);
   }
@@ -81,8 +80,6 @@ export async function seedAll() {
     start_date: new Date('2026-03-01'),
     end_date: new Date('2026-03-14'),
     status: 'active',
-    velocity_target: 42,
-    efficiency_target: 94,
   });
   await sprintRepo.save(sprint);
   console.log('✅ Sprint created');
