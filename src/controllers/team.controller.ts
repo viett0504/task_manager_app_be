@@ -368,4 +368,53 @@ export class TeamController {
       next(error);
     }
   }
+
+  async getAvailableUsers(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+
+      const teamMemberRepository = AppDataSource.getRepository(TeamMember);
+      const userRepository = AppDataSource.getRepository(User);
+
+      // Check if user is member
+      const membership = await teamMemberRepository.findOne({
+        where: { user_id: userId, team_id: id },
+      });
+
+      if (!membership) {
+        throw new AppError('You are not a member of this team', 403, 'FORBIDDEN');
+      }
+
+      // Get all users
+      const allUsers = await userRepository.find({
+        select: ['id', 'full_name', 'email', 'avatar_url'],
+      });
+
+      // Get current team members
+      const teamMembers = await teamMemberRepository.find({
+        where: { team_id: id },
+        select: ['user_id'],
+      });
+
+      const teamMemberIds = teamMembers.map(m => m.user_id);
+
+      // Filter out users who are already members
+      const availableUsers = allUsers.filter(user => !teamMemberIds.includes(user.id));
+
+      res.json({
+        success: true,
+        data: {
+          users: availableUsers.map(user => ({
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            avatar_url: user.avatar_url,
+          })),
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
